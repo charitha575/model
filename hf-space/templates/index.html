@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Visual Product Search - Test Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>AI VISUAL PRODUCT SEARCH</h1>
+    <p class="subtitle">Test Dashboard — Add Products & Search by Image</p>
+
+    <!-- API Key -->
+    <div class="form-row" style="margin-bottom:10px">
+        <input type="password" id="apiKey" placeholder="Enter API Key" style="width:300px">
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="statsBar">Loading stats...</div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" id="tabAdd" onclick="showTab('add')">Add Product</button>
+        <button class="tab" id="tabSearch" onclick="showTab('search')">Search by Image</button>
+        <button class="tab tab-danger" onclick="resetIndex()">Reset Index</button>
+    </div>
+
+    <!-- ADD PRODUCT TAB -->
+    <div id="addTab" class="tab-content">
+        <div class="upload-box">
+            <h3>Add a Product Image to Index</h3>
+            <input type="file" id="addFileInput" accept="image/*">
+            <div class="form-row">
+                <input type="text" id="productId" placeholder="Product ID (e.g. shoe_001)">
+                <input type="text" id="category" placeholder="Category (e.g. FOOTWEAR)">
+            </div>
+            <button onclick="addProduct()">Add to Index</button>
+        </div>
+        <div id="addPreview"></div>
+        <div id="addResult"></div>
+    </div>
+
+    <!-- SEARCH TAB -->
+    <div id="searchTab" class="tab-content" style="display:none">
+        <div class="upload-box">
+            <h3>Upload an Image to Find Similar Products</h3>
+            <input type="file" id="searchFileInput" accept="image/*">
+            <button onclick="searchProduct()">Search</button>
+        </div>
+        <div id="searchPreview"></div>
+        <h2 id="resultTitle"></h2>
+        <div id="results"></div>
+    </div>
+
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

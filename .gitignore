@@ -1,0 +1,10 @@
+static/uploads/
+vit_model.pth
+*.faiss
+__pycache__/
+product_images/
+dataset/
+*.zip
+hf-clean/
+temp/
+debug*.txt
