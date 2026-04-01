@@ -124,6 +124,16 @@ def add_image():
     product_id = request.form.get("product_id", "unknown")
     category = request.form.get("category", "uncategorized")
 
+    # Skip if product_id already indexed (prevent duplicates)
+    for key, meta in retrieval_system.metadata.items():
+        if meta.get("product_id") == product_id:
+            return jsonify({
+                "success": True,
+                "message": "Product already indexed, skipping",
+                "total_images": retrieval_system.index.ntotal,
+                "product_id": product_id
+            })
+
     file = request.files["image"]
 
     # Save temporarily to extract features
