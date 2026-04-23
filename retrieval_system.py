@@ -1,4 +1,3 @@
-# https://youtu.be/rFCtZj_r6tA
 """
 Image Retrieval System
 
@@ -33,6 +32,10 @@ Note about IndexIVFFlat:
 
 """
 
+print("FILE LOADED SUCCESSFULLY")
+print("Classes in this file:", [name for name in globals()])
+print("FEATURE FILE LOADED")
+print("Classes:", [name for name in globals()])
 
 
 import os
@@ -98,17 +101,10 @@ class ImageRetrievalSystem:
         logger.info(f"Indexing images from {image_dir}")
         
         # Get all image paths
-        #image_paths = [
-          #  os.path.join(image_dir, f) for f in os.listdir(image_dir)
-         #   if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
-        #]
-
-
-        image_paths = []
-        for root, dirs, files in os.walk(image_dir):
-            for file in files:
-                if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                    image_paths.append(os.path.join(root, file))
+        image_paths = [
+            os.path.join(image_dir, f) for f in os.listdir(image_dir)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
+        ]
         
         features_list = []
         valid_paths = []
@@ -117,9 +113,6 @@ class ImageRetrievalSystem:
         for img_path in image_paths:
             try:
                 features = self.feature_extractor.extract_features(img_path)
-                
-                if features is None:
-                    continue
                 features_list.append(features)
                 valid_paths.append(img_path)
                 logger.info(f"Processed {img_path}")
@@ -164,8 +157,8 @@ class ImageRetrievalSystem:
         logger.info(f"Total images in index: {self.index.ntotal}")
         logger.info(f"Available metadata keys: {list(self.metadata.keys())}")
         
-        if self.index.ntotal == 0:
-            raise RuntimeError("Index is empty. Load index properly.")
+        if not self.is_trained:
+            raise RuntimeError("Index has not been trained. Add images first.")
         
         # Extract features from query image
         query_features = self.feature_extractor.extract_features(query_image_path)
@@ -191,6 +184,7 @@ class ImageRetrievalSystem:
                 logger.info(f"Match found: {self.metadata[str_idx]['path']} with distance {dist:.3f}")
             else:
                 logger.warning(f"Index {idx} not found in metadata")
+        # Prepare results with similarity score
         
         # Sort results by distance (smaller is better)
         results.sort(key=lambda x: x[1])

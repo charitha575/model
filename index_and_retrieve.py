@@ -1,4 +1,3 @@
-# https://youtu.be/rFCtZj_r6tA
 """
 
 1. Main Control Function (run_image_retrieval):
@@ -33,9 +32,6 @@ import os
 import logging
 import math
 
-from PIL import Image
-import matplotlib.pyplot as plt
-
 # Added to fix OpenMP warning
 os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
 
@@ -65,7 +61,6 @@ def print_results(results):
         return
         
     print("\nSearch Results:")
-    show_results(QUERY_IMAGE, results)
     print("-" * 50)
     for i, (path, distance) in enumerate(results, 1):
         similarity = 1.0 / (1.0 + distance)  # Convert distance to similarity score
@@ -75,14 +70,6 @@ def print_results(results):
         print(f"   Similarity Score: {similarity:.3f}")
         print(f"   Distance: {distance:.3f}")
         print("-" * 50)
-
-def get_all_image_paths(root_dir):
-    image_paths = []
-    for root, dirs, files in os.walk(root_dir):
-        for file in files:
-            if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                image_paths.append(os.path.join(root, file))
-    return image_paths
 
 def run_image_retrieval(
     task: str = "index",              
@@ -104,11 +91,8 @@ def run_image_retrieval(
                 raise ValueError("image_dir is required for indexing task")
             
             # Count number of images in directory
-            #image_files = [f for f in os.listdir(image_dir) 
-             #            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
-            #num_images = len(image_files)
-
-            image_files = get_all_image_paths(image_dir)
+            image_files = [f for f in os.listdir(image_dir) 
+                         if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
             num_images = len(image_files)
             
             # Calculate optimal number of regions if not specified
@@ -163,30 +147,12 @@ def run_image_retrieval(
         logger.error(f"Error: {str(e)}")
         raise
 
-
-def show_results(query, results):
-    plt.figure(figsize=(12,5))
-    
-    # Query image
-    plt.subplot(1,6,1)
-    plt.imshow(Image.open(query))
-    plt.title("Query")
-    plt.axis('off')
-
-    for i, res in enumerate(results):
-        plt.subplot(1,6,i+2)
-        plt.imshow(Image.open(res[0]))  # ✅ FIX HERE
-        plt.title(f"{i+1}")
-        plt.axis('off')
-
-    plt.show()
 # Example usage
 if __name__ == "__main__":
     # Parameters
-    TASK = "index"  # Change this to "index" or "search" for searching
-    #IMAGE_DIR = "all_images"  # Directory containing images to index
-    IMAGE_DIR = "dataset/ECOMMERCE_PRODUCT_IMAGES/train"
-    QUERY_IMAGE = "query_images/shoe.jpeg"  # Image to search for
+    TASK = "search"  # Change this to "index" or "search" for searching
+    IMAGE_DIR = "all_images"  # Directory containing images to index
+    QUERY_IMAGE = "query_images/rotated.jpg"  # Image to search for
     INDEX_PATH = "image_index.faiss"   # Where to save/load the index
     METADATA_PATH = "image_metadata.json"  # Where to save/load the metadata
     

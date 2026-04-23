@@ -1,5 +1,3 @@
-# https://youtu.be/rFCtZj_r6tA
-
 import torch
 from torch.utils.data import Dataset
 from torchvision.models import vit_b_16, ViT_B_16_Weights
@@ -30,7 +28,7 @@ class ImageDataset(Dataset):
             return image, image_path
         except Exception as e:
             logger.error(f"Error loading image {image_path}: {str(e)}")
-            raise e
+            raise
 
 class ImageFeatureExtractor:
     def __init__(self, device: Optional[str] = None):
@@ -42,20 +40,11 @@ class ImageFeatureExtractor:
         logger.info(f"Using device: {self.device}")
         
         # Initialize ViT model
-        #self.model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_V1)
-        self.model = vit_b_16(weights=None)
-        self.model.heads.head = torch.nn.Linear(768, 8)
-
-# Load your trained model
-        model_path = "vit_model.pth"   # put correct path if needed
-        state_dict = torch.load(model_path, map_location=self.device)
-
-        self.model.load_state_dict(state_dict)
-        # Remove classification head
-        self.model.heads = torch.nn.Identity()
-        # Create a modified forward method to get embeddings instead of classification
-        #self.original_forward = self.model.forward
-        #self.model.forward = self._forward_features
+        self.model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_V1)
+        
+        # Keep original forward just in case and replace with feature forward
+        self.original_forward = self.model.forward
+        self.model.forward = self._forward_features
         
         self.model.eval()
         self.model.to(self.device)
@@ -68,15 +57,20 @@ class ImageFeatureExtractor:
             transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                               std=[0.229, 0.224, 0.225])
+                                 std=[0.229, 0.224, 0.225])
         ])
         
         logger.info(f"Initialized ViT feature extractor with dimension: {self.feature_dim}")
 
     def _forward_features(self, x):
         """Modified forward pass to get embeddings instead of classification."""
-        # Process input
-        x = self.model._process_input(x)
+        # torchvision ViT expects a processed input: call model._process_input if available
+        try:
+            x = self.model._process_input(x)
+        except Exception:
+            # fallback if method name differs
+            pass
+
         n = x.shape[0]
 
         # Add class token
@@ -122,4 +116,7 @@ class ImageFeatureExtractor:
     def __del__(self):
         # Restore original forward method when object is destroyed
         if hasattr(self, 'original_forward'):
-            self.model.forward = self.original_forward
+            try:
+                self.model.forward = self.original_forward
+            except Exception:
+                pass
